@@ -1,4 +1,3 @@
-from .band import Band
-from .venue import Venue
-from .concert import Concert
-from database import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()

@@ -1,28 +1,31 @@
-import os
 import sys
-from sqlalchemy import engine_from_config, pool
+import os
+from pathlib import Path
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+from models import Base  # Adjust this import based on your actual models
 
-# Add your project directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-# Import the Base and metadata
-from database import Base
+# Add the project's root directory to the Python path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 config = context.config
+
+# Set up target metadata
 target_metadata = Base.metadata
 
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"})
 
     with context.begin_transaction():
         context.run_migrations()
 
 def run_migrations_online():
-    connectable = engine_from_config(config.get_section(config.config_ini_section),
-                                     prefix='sqlalchemy.',
-                                     poolclass=pool.NullPool)
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix='sqlalchemy.',
+        poolclass=pool.NullPool
+    )
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
